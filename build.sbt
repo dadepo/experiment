@@ -24,8 +24,18 @@ lazy val global = project
   .in(file("."))
   .settings(
     scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
-    resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/")
-  )
+    resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"),
+    libraryDependencies ++= commonDependencies ++ Seq(
+      "com.typesafe.akka" %% "akka-slf4j"                          % akkaVersion,
+      "ch.qos.logback"    %  "logback-classic"                     % "1.2.3",
+      "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
+      "io.dropwizard.metrics" % "metrics-core" % "3.2.2",
+      Cinnamon.library.cinnamonCHMetrics3,
+      Cinnamon.library.cinnamonAkka,
+      Cinnamon.library.cinnamonCHMetricsElasticsearchReporter,
+      Cinnamon.library.cinnamonSlf4jEvents,
+    )
+  ).enablePlugins(Cinnamon)
   .aggregate(
     common,
     seedroute,
@@ -96,3 +106,9 @@ dockerBaseImage := "java:8-jre-alpine"
 version in Docker := "latest"
 dockerExposedPorts := Seq(8000)
 dockerRepository := Some("dadepo")
+
+cinnamon in run := true
+cinnamon in test := true
+
+// Set the Cinnamon Agent log level
+cinnamonLogLevel := "INFO"

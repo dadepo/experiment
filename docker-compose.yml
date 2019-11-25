@@ -1,0 +1,87 @@
+version: "3.5"
+
+networks:
+  experiment-network:
+
+services:
+  seed:
+    networks:
+      - experiment-network
+    image: seedroute:0.1.0-SNAPSHOT
+    ports:
+      - '1600:1600'
+    environment:
+      CLUSTER_PORT: 1600
+      CLUSTER_IP: seed
+      SEED_PORT_1600_TCP_ADDR: seed
+
+  worker:
+    networks:
+      - experiment-network
+    image: workerroute:0.1.0-SNAPSHOT
+    ports:
+      - '1601:1601'
+    environment:
+      CLUSTER_PORT: 1601
+      CLUSTER_IP: worker
+      SEED_PORT_1600_TCP_ADDR: seed
+
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.3
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+#    networks:
+#      - experiment-network
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:5.6.3
+#    ports:
+#      - "5601:5601"
+#    networks:
+#      - experiment-network
+#    depends_on:
+#      - elasticsearch
+#  backend:
+#    image: lightbend-docker-registry.bintray.io/cinnamon/cinnamon-vizceral:0.1
+#    ports:
+#      - "8999:8999"
+#    networks:
+#      - experiment-network
+#    depends_on:
+#      - elasticsearch
+#  web:
+#    image: lightbend-docker-registry.bintray.io/cinnamon/cinnamon-vizceral-frontend:0.1.1
+#    ports:
+#      - "8080:80"
+#    networks:
+#      - experiment-network
+#    depends_on:
+#      - backend
+
+
+#  elasticsearch:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.0
+#    ports: ["9200:9200"]
+#    networks: ["experiment-network"]
+#    environment: ["discovery.type=single-node"]
+#
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:6.7.0
+#    ports: ["5601:5601"]
+#    networks: ["experiment-network"]
+#    depends_on: ["elasticsearch"]
+#
+#  logstash:
+#    image: docker.elastic.co/logstash/logstash:6.7.0
+#    volumes:
+#      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+#    networks: ["experiment-network"]
+#    ports: ["5000:5000/udp"]
+#    depends_on: ["elasticsearch"]
+#
+#  grafana:
+#    image: grafana/grafana:6.0.2
+#    volumes: ["./grafana/plugins/cinnamon-elasticsearch-app:/var/lib/grafana/plugins/cinnamon-elasticsearch-app"]
+#    ports: ["3000:3000"]
+#    networks: ["experiment-network"]
+#    depends_on: ["elasticsearch"]
