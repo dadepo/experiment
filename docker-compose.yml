@@ -10,7 +10,9 @@ services:
     image: seedroute:0.1.0-SNAPSHOT
     ports:
       - '1600:1600'
+      - '8000:8000'
     environment:
+      SERVER_IP: 0.0.0.0
       CLUSTER_PORT: 1600
       CLUSTER_IP: seed
       SEED_PORT_1600_TCP_ADDR: seed

@@ -18,8 +18,7 @@ class WorkerActor extends Actor {
 
   def performIO(id: Int) = Future {
     Thread.sleep(5000)
-    //log.info("Done processing external payment purchase with id : {}", id)
-    println("Done processing external payment purchase with id : ", id)
+    println(s"Done processing IO bound task with id : $id")
   }
 
   def performCPU(id: Int) = {
@@ -27,8 +26,8 @@ class WorkerActor extends Actor {
     def fib(n: BigInteger): BigInteger = if (n.compareTo(BigInteger.ONE) == -1 || n.compareTo(BigInteger.ONE) == 0) n
     else fib(n.subtract(BigInteger.ONE)).add(fib(n.subtract(BigInteger.ONE).subtract(BigInteger.ONE)))
 
-    fib(BigInteger.valueOf(id))
-    println("Done processing internal payment purchase with id : ", id)
+    fib(BigInteger.valueOf(10))
+    println(s"Done processing CPU bound task with id : $id")
   }
 
   override def receive: Receive = {

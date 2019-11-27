@@ -49,7 +49,11 @@ lazy val common = project.settings(
 
 lazy val seedroute = project.settings(
   name := "seedroute",
-  libraryDependencies ++= commonDependencies
+  libraryDependencies ++= commonDependencies ++ Seq(
+    "com.typesafe.akka" %% "akka-http"   % "10.1.10",
+    "com.typesafe.akka" %% "akka-stream" % "2.5.23",
+    "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.10"
+  )
 ).enablePlugins(JavaAppPackaging)
   .enablePlugins(DockerPlugin)
   .dependsOn(
@@ -65,43 +69,6 @@ lazy val workerroute = project.settings(
   common
 )
 
-
-//import com.typesafe.sbt.SbtMultiJvm.multiJvmSettings
-//import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
-//
-//val akkaVersion = "2.6.0"
-//
-//lazy val `experiment-app` = project
-//  .in(file("."))
-//  .settings(multiJvmSettings: _*)
-//  .settings(
-//    organization := "com.typesafe.akka.samples",
-//    scalaVersion := "2.13.1",
-//    Compile / scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
-//    Compile / javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
-//    run / javaOptions ++= Seq("-Xms128m", "-Xmx1024m", "-Djava.library.path=./target/native"),
-//    libraryDependencies ++= Seq(
-//      "com.typesafe.akka" %% "akka-actor"           % akkaVersion,
-//      "com.typesafe.akka" %% "akka-cluster"         % akkaVersion,
-//      "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
-//      "com.typesafe.akka" %% "akka-multi-node-testkit"    % akkaVersion,
-//      "ch.qos.logback"    %  "logback-classic"             % "1.2.3",
-//      "org.scalatest"     %% "scalatest"                  % "3.0.8"     % Test,
-//      "com.typesafe.akka" %% "akka-actor-testkit"   % akkaVersion % Test),
-//    run / fork := false,
-//    Global / cancelable := false,
-//    // disable parallel tests
-//    Test / parallelExecution := false,
-//    licenses := Seq(("CC0", url("http://creativecommons.org/publicdomain/zero/1.0")))
-//  )
-//  .configs (MultiJvm)
-
-
-
-//enablePlugins(JavaAppPackaging)
-//enablePlugins(DockerPlugin)
-//enablePlugins(AshScriptPlugin)
-//
 dockerBaseImage := "java:8-jre-alpine"
 version in Docker := "latest"
 dockerExposedPorts := Seq(8000)
