@@ -11,9 +11,6 @@ object SeedActor {
 
 class SeedActor extends Actor with Timers {
 
-  timers.startPeriodicTimer("TickKey", "hello", 5000.millis)
-
-
   override def receive: Receive = {
     case "hello" => {
       println("I am Seed App")

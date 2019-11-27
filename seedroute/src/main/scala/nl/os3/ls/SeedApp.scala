@@ -27,7 +27,17 @@ object SeedApp extends App {
   val workRouter: ActorRef = system.actorOf(FromConfig.props(Props.empty), "workRouter")
 
   import system.dispatcher
-  system.scheduler.schedule(Duration.Zero, 2000.milliseconds, workRouter, "yo")
+
+  system.scheduler.schedule(10 seconds, 30 seconds) {
+    println("Starting..")
+    for (i <- 1 to 6) {
+      if (i % 2 == 0)
+        workRouter ! CPUTasks(i)
+      else
+        workRouter ! IOTasks(i)
+    }
+    println("Done...")
+  }
 
   system.actorOf(SeedActor())
 
