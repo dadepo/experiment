@@ -17,7 +17,7 @@ services:
       CLUSTER_IP: seed
       SEED_PORT_1600_TCP_ADDR: seed
 
-  worker:
+  worker1:
     networks:
       - experiment-network
     image: workerroute:0.1.0-SNAPSHOT
@@ -25,7 +25,18 @@ services:
       - '1601:1601'
     environment:
       CLUSTER_PORT: 1601
-      CLUSTER_IP: worker
+      CLUSTER_IP: worker1
+      SEED_PORT_1600_TCP_ADDR: seed
+
+  worker2:
+    networks:
+      - experiment-network
+    image: workerroute:0.1.0-SNAPSHOT
+    ports:
+      - '1602:1602'
+    environment:
+      CLUSTER_PORT: 1602
+      CLUSTER_IP: worker2
       SEED_PORT_1600_TCP_ADDR: seed
 
 #  elasticsearch:

@@ -10,3 +10,5 @@ case class IOTasks(taskId:Int) extends Tasks
 case class CPUTasks(taskId:Int) extends Tasks
 
 case class ExperimentData(cpuTasks:Int, ioTasks:Int, delay:Int)
+
+case class CreateWorkerRouter(amount:Int)

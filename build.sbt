@@ -57,7 +57,7 @@ lazy val seedroute = project.settings(
 ).enablePlugins(JavaAppPackaging)
   .enablePlugins(DockerPlugin)
   .dependsOn(
-  common
+    common, workerroute
 )
 
 lazy val workerroute = project.settings(

@@ -1,10 +1,11 @@
 package nl.os3.ls
 
 import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.routing.FromConfig
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
+import akka.routing.{FromConfig, RoundRobinPool}
 import com.typesafe.config.{Config, ConfigFactory}
 import akka.http.scaladsl.server.RouteResult._
+import akka.pattern.ask
 
 import scala.io.StdIn
 import akka.actor.ActorSystem
@@ -12,7 +13,10 @@ import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
+import nl.os3.ls.ClusterManager.GetMembers
+import akka.util.Timeout
 
+import scala.concurrent.duration._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 // for JSON serialization/deserialization following dependency is required:
@@ -39,8 +43,12 @@ object SeedApp extends App {
   println("I am connecting to seed on : {}", seed)
 
   implicit val system: ActorSystem = ActorSystem(clusterName, config)
+  implicit lazy val timeout = Timeout(5.seconds)
 
-  val workRouter: ActorRef = system.actorOf(FromConfig.props(Props.empty), "workRouter")
+//  val workRouter: ActorRef = system.actorOf(FromConfig.props(Props.empty), "workRouter")
+  val clusterManager: ActorRef = system.actorOf(ClusterManager(), "clusterManager")
+
+  val workRouter: ActorRef = system.actorOf(FromConfig.props(Props[WorkerRouterActor]), "workRouter")
 
   system.actorOf(SeedActor())
 
@@ -51,7 +59,12 @@ object SeedApp extends App {
   val route: Route =
     concat(
       get {
-        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Experiment App</h1>"))
+        path("members") {
+          val membersFuture: Future[List[String]] = (clusterManager ? GetMembers).mapTo[List[String]]
+          onSuccess(membersFuture) { members =>
+            complete(StatusCodes.OK, members)
+          }
+        }
       },
       post {
         path("start") {
