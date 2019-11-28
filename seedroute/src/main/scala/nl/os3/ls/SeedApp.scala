@@ -2,13 +2,14 @@ package nl.os3.ls
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
-import akka.routing.{FromConfig, RoundRobinPool}
+import akka.routing.{ConsistentHashingPool, FromConfig, RoundRobinPool}
 import com.typesafe.config.{Config, ConfigFactory}
 import akka.http.scaladsl.server.RouteResult._
 import akka.pattern.ask
 
 import scala.io.StdIn
 import akka.actor.ActorSystem
+import akka.cluster.routing.{ClusterRouterPool, ClusterRouterPoolSettings}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Route
@@ -48,7 +49,13 @@ object SeedApp extends App {
 //  val workRouter: ActorRef = system.actorOf(FromConfig.props(Props.empty), "workRouter")
   val clusterManager: ActorRef = system.actorOf(ClusterManager(), "clusterManager")
 
-  val workRouter: ActorRef = system.actorOf(FromConfig.props(Props[WorkerRouterActor]), "workRouter")
+  //val workRouter: ActorRef = system.actorOf(FromConfig.props(Props[WorkerRouterActor]), "workRouter")
+
+  val workRouter = system.actorOf(
+    ClusterRouterPool(
+      RoundRobinPool(0),
+      ClusterRouterPoolSettings(totalInstances = 2, maxInstancesPerNode = 1, allowLocalRoutees = false)
+    ).props(Props[WorkerRouterActor]), name = "workRouter")
 
   system.actorOf(SeedActor())
 

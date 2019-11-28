@@ -7,10 +7,10 @@ import collection.JavaConverters._
 import scala.collection.mutable
 
 object WorkerApp extends App {
-//  val config = ConfigFactory.parseString("akka.remote.netty.tcp.port=1601")
-//    .withFallback(ConfigFactory.load())
+  val config = ConfigFactory.parseString("akka.remote.netty.tcp.port=1601")
+    .withFallback(ConfigFactory.load())
 
-  val config: Config = ConfigFactory.load()
+//  val config: Config = ConfigFactory.load()
 
   val hostIp = config.getString("akka.remote.netty.tcp.hostname")
   val hostPost = config.getString("akka.remote.netty.tcp.port")
