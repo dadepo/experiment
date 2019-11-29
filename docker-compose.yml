@@ -11,6 +11,8 @@ services:
     ports:
       - '1600:1600'
       - '8000:8000'
+    env_file:
+      - experiment.env
     environment:
       SERVER_IP: 0.0.0.0
       CLUSTER_PORT: 1600
@@ -23,6 +25,8 @@ services:
     image: workerroute:0.1.0-SNAPSHOT
     ports:
       - '1601:1601'
+    env_file:
+      - experiment.env
     environment:
       CLUSTER_PORT: 1601
       CLUSTER_IP: worker1
@@ -34,6 +38,8 @@ services:
     image: workerroute:0.1.0-SNAPSHOT
     ports:
       - '1602:1602'
+    env_file:
+      - experiment.env
     environment:
       CLUSTER_PORT: 1602
       CLUSTER_IP: worker2

@@ -2,11 +2,13 @@ package nl.os3.ls
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.cluster.{Cluster, MemberStatus}
-import nl.os3.ls.ClusterManager.GetMembers
+import com.typesafe.config.{Config, ConfigFactory}
+import nl.os3.ls.ClusterManager.{GetEnv, GetMembers}
 
 object ClusterManager {
 
   case object GetMembers
+  case object GetEnv
 
   def apply() = Props[ClusterManager]
 }

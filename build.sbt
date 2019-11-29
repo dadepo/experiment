@@ -3,6 +3,13 @@ name := "experiment-app"
 organization in ThisBuild := "nl.os3.ls"
 scalaVersion in ThisBuild := "2.12.7"
 
+
+cinnamon in run := true
+cinnamon in test := true
+
+// Set the Cinnamon Agent log level
+cinnamonLogLevel := "INFO"
+
 val akkaVersion = "2.5.26"
 
 lazy val dependencies = new {
@@ -17,6 +24,15 @@ lazy val commonDependencies = Seq(
   dependencies.akkaCluser,
   dependencies.akkaSl4j,
   dependencies.akkaLogback
+) ++ Seq(
+  "com.typesafe.akka" %% "akka-slf4j"                          % akkaVersion,
+  "ch.qos.logback"    %  "logback-classic"                     % "1.2.3",
+  "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
+  "io.dropwizard.metrics" % "metrics-core" % "3.2.2",
+  Cinnamon.library.cinnamonCHMetrics3,
+  Cinnamon.library.cinnamonAkka,
+  Cinnamon.library.cinnamonCHMetricsElasticsearchReporter,
+  Cinnamon.library.cinnamonSlf4jEvents,
 )
 
 
@@ -45,7 +61,7 @@ lazy val global = project
 lazy val common = project.settings(
   name := "common",
   libraryDependencies ++= commonDependencies
-)
+).enablePlugins(Cinnamon)
 
 lazy val seedroute = project.settings(
   name := "seedroute",
@@ -56,6 +72,7 @@ lazy val seedroute = project.settings(
   )
 ).enablePlugins(JavaAppPackaging)
   .enablePlugins(DockerPlugin)
+  .enablePlugins(Cinnamon)
   .dependsOn(
     common, workerroute
 )
@@ -64,6 +81,7 @@ lazy val workerroute = project.settings(
   name := "workerroute",
   libraryDependencies ++= commonDependencies
 ).enablePlugins(JavaAppPackaging)
+  .enablePlugins(Cinnamon)
   .enablePlugins(DockerPlugin)
   .dependsOn(
   common
@@ -73,9 +91,3 @@ dockerBaseImage := "java:8-jre-alpine"
 version in Docker := "latest"
 dockerExposedPorts := Seq(8000)
 dockerRepository := Some("dadepo")
-
-cinnamon in run := true
-cinnamon in test := true
-
-// Set the Cinnamon Agent log level
-cinnamonLogLevel := "INFO"

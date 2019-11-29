@@ -3,7 +3,6 @@ package nl.os3.ls
 import scala.concurrent.duration._
 import akka.actor.{Actor, ActorRef, Props, Timers}
 import akka.routing.FromConfig
-import nl.os3.ls.SeedApp.system
 
 object SeedActor {
   def apply() = Props[SeedActor]

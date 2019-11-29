@@ -1,5 +1,7 @@
 package nl.os3.ls
 
+import java.time.LocalDateTime
+
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.routing.{ConsistentHashingPool, FromConfig, RoundRobinPool}
@@ -46,30 +48,28 @@ object SeedApp extends App {
   implicit val system: ActorSystem = ActorSystem(clusterName, config)
   implicit lazy val timeout = Timeout(5.seconds)
 
-//  val workRouter: ActorRef = system.actorOf(FromConfig.props(Props.empty), "workRouter")
   val clusterManager: ActorRef = system.actorOf(ClusterManager(), "clusterManager")
 
-  //val workRouter: ActorRef = system.actorOf(FromConfig.props(Props[WorkerRouterActor]), "workRouter")
-
-  val workRouter = system.actorOf(
-    ClusterRouterPool(
-      RoundRobinPool(0),
-      ClusterRouterPoolSettings(totalInstances = 2, maxInstancesPerNode = 1, allowLocalRoutees = false)
-    ).props(Props[WorkerRouterActor]), name = "workRouter")
+  val workRouter:ActorRef = SeedToWorkerNodeRouterCreator.createWorkRouter(system)
 
   system.actorOf(SeedActor())
 
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
-  implicit val itemFormat = jsonFormat3(ExperimentData)
+  implicit val itemFormat = jsonFormat5(ExperimentData)
 
   val route: Route =
     concat(
       get {
         path("members") {
           val membersFuture: Future[List[String]] = (clusterManager ? GetMembers).mapTo[List[String]]
+          val value = config.getConfig("experiment")
           onSuccess(membersFuture) { members =>
-            complete(StatusCodes.OK, members)
+            complete(StatusCodes.OK, Map (
+              "type" -> value.getString("type"),
+              "no_worker" -> value.getString("no_worker"),
+              "members" -> members.mkString("---===---")
+            ))
           }
         }
       },
@@ -78,12 +78,17 @@ object SeedApp extends App {
           entity(as[ExperimentData]) { experimentData =>
 
             val ioTasks = experimentData.ioTasks
+            val ioThreadSleep = experimentData.ioThreadSleep
+
             val cpuTasks = experimentData.cpuTasks
+            val fibCompute = experimentData.fibCompute
+
             val interval = experimentData.delay
 
             val iotaskFuture = Future {
               for (i <- 1 to ioTasks) {
-                workRouter ! IOTasks(i)
+                println(s"dispatching io task with id:$i at ${LocalDateTime.now()}")
+                workRouter ! IOTasks(i, ioThreadSleep)
                 if (interval != -1 || interval != 0) {
                   Thread.sleep(interval * 1000)
                 }
@@ -92,7 +97,8 @@ object SeedApp extends App {
 
             val cputaskFuture = Future {
               for (i <- 1 to cpuTasks) {
-                workRouter ! CPUTasks(i)
+                println(s"dispatching cpu task with id:$i at ${LocalDateTime.now()}")
+                workRouter ! CPUTasks(i, fibCompute)
                 if (interval != -1 || interval != 0) {
                   Thread.sleep(interval * 1000)
                 }

@@ -1,23 +1,26 @@
 package nl.os3.ls
 
+import java.time.LocalDateTime
+
 import akka.actor.{Actor, ActorRef, Props, Timers}
 import akka.routing.RoundRobinPool
 
 object WorkerRouterActor {
   def apply() = Props[WorkerRouterActor]
 }
-import scala.concurrent.duration._
 
 class WorkerRouterActor extends Actor with Timers {
 
-  val router: ActorRef = context.actorOf(RoundRobinPool(5).props(Props[WorkerActor]), "workerActor")
+  val router: ActorRef = WorkerRouterCreator.createWorkerRouter(context)
 
   override def receive: Receive = {
-    case iotask @ IOTasks(taskId) => {
-      router ! iotask
+    case iotask @ IOTasks(i,_) => {
+      println(s"routing io task with id:$i to worker at ${LocalDateTime.now()}")
+      router !  iotask
     }
-    case cputask @ CPUTasks(taskId) => {
-      router ! cputask
+    case cputask @ CPUTasks(i,_) => {
+      println(s"routing io task with cpu:$i to worker at ${LocalDateTime.now()}")
+      router !  cputask
     }
   }
 }
