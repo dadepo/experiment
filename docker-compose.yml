@@ -7,14 +7,18 @@ services:
   seed:
     networks:
       - experiment-network
-    image: seedroute:0.1.0-SNAPSHOT
+    image: registry.me:5000/seedroute:0.1.0-SNAPSHOT
+    deploy:
+      mode: replicated
+      placement:
+         constraints: [node.labels.role == master]
     ports:
       - '1600:1600'
       - '8000:8000'
     env_file:
       - experiment.env
     environment:
-      SERVER_IP: 0.0.0.0
+#     SERVER_IP: 0.0.0.0
       CLUSTER_PORT: 1600
       CLUSTER_IP: seed
       SEED_PORT_1600_TCP_ADDR: seed
@@ -22,7 +26,11 @@ services:
   worker1:
     networks:
       - experiment-network
-    image: workerroute:0.1.0-SNAPSHOT
+    image: registry.me:5000/workerroute:0.1.0-SNAPSHOT
+    deploy:
+      mode: replicated            
+      placement:
+         constraints: [node.labels.role == worker]
     ports:
       - '1601:1601'
     env_file:
@@ -35,12 +43,16 @@ services:
   worker2:
     networks:
       - experiment-network
-    image: workerroute:0.1.0-SNAPSHOT
+    image: 192.168.0.10:5000/workerroute:0.1.0-SNAPSHOT
+    deploy:
+      mode: replicated
+      placement:
+         constraints: [node.labels.role == worker]
     ports:
       - '1602:1602'
     env_file:
       - experiment.env
-    environment:
+    environment:      
       CLUSTER_PORT: 1602
       CLUSTER_IP: worker2
       SEED_PORT_1600_TCP_ADDR: seed
