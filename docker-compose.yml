@@ -2,6 +2,8 @@ version: "3.5"
 
 networks:
   experiment-network:
+    driver: overlay
+    attachable: true
 
 services:
   seed:
@@ -18,12 +20,15 @@ services:
     env_file:
       - experiment.env
     environment:
-#     SERVER_IP: 0.0.0.0
+      SERVER_IP: 0.0.0.0
       CLUSTER_PORT: 1600
       CLUSTER_IP: seed
       SEED_PORT_1600_TCP_ADDR: seed
 
+
   worker1:
+    depends_on:      
+      - seed          
     networks:
       - experiment-network
     image: registry.me:5000/workerroute:0.1.0-SNAPSHOT
@@ -41,9 +46,11 @@ services:
       SEED_PORT_1600_TCP_ADDR: seed
 
   worker2:
+    depends_on:
+      - seed      
     networks:
       - experiment-network
-    image: 192.168.0.10:5000/workerroute:0.1.0-SNAPSHOT
+    image: registry.me:5000/workerroute:0.1.0-SNAPSHOT
     deploy:
       mode: replicated
       placement:
