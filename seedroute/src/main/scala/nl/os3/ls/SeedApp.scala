@@ -77,6 +77,8 @@ object SeedApp extends App {
         path("start") {
           entity(as[ExperimentData]) { experimentData =>
 
+            val uuid = java.util.UUID.randomUUID().toString
+
             val ioTasks = experimentData.ioTasks
             val ioThreadSleep = experimentData.ioThreadSleep
 
@@ -87,8 +89,8 @@ object SeedApp extends App {
 
             val iotaskFuture = Future {
               for (i <- 1 to ioTasks) {
-                println(s"dispatching io task with id:$i at ${LocalDateTime.now()}")
-                workRouter ! IOTasks(i, ioThreadSleep)
+                println(s"dispatching io task count: $i with id:$uuid at ${LocalDateTime.now()}")
+                workRouter ! IOTasks(uuid, i, ioThreadSleep)
                 if (interval != -1 || interval != 0) {
                   Thread.sleep(interval * 1000)
                 }
@@ -97,8 +99,8 @@ object SeedApp extends App {
 
             val cputaskFuture = Future {
               for (i <- 1 to cpuTasks) {
-                println(s"dispatching cpu task with id:$i at ${LocalDateTime.now()}")
-                workRouter ! CPUTasks(i, fibCompute)
+                println(s"dispatching cpu task count: $i with id:$uuid at ${LocalDateTime.now()}")
+                workRouter ! CPUTasks(uuid, i, fibCompute)
                 if (interval != -1 || interval != 0) {
                   Thread.sleep(interval * 1000)
                 }

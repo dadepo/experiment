@@ -14,12 +14,12 @@ class WorkerRouterActor extends Actor with Timers {
   val router: ActorRef = WorkerRouterCreator.createWorkerRouter(context)
 
   override def receive: Receive = {
-    case iotask @ IOTasks(i,_) => {
-      println(s"routing io task with id:$i to worker at ${LocalDateTime.now()}")
+    case iotask @ IOTasks(uuid, i, _) => {
+      println(s"routing io task count: $i with id:$uuid to worker at ${LocalDateTime.now()}")
       router !  iotask
     }
-    case cputask @ CPUTasks(i,_) => {
-      println(s"routing io task with cpu:$i to worker at ${LocalDateTime.now()}")
+    case cputask @ CPUTasks(uuid, i,_) => {
+      println(s"routing cpu task count: $i with id:$uuid to worker at ${LocalDateTime.now()}")
       router !  cputask
     }
   }
