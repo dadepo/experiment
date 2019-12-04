@@ -21,19 +21,19 @@ class WorkerActor extends Actor {
   val log = Logging(context.system, this)
 
   def performIO(uuid: String, count: Int, ioThreadSleep: Int) = Future {
-    println(s"received io task count:$count with id:$uuid at ${LocalDateTime.now()}")
+    log.info(s"received io task count:$count with id:$uuid at ${LocalDateTime.now()}")
     Thread.sleep(ioThreadSleep * 1000)
-    println(s"done processing IO bound task count:$count with id:$uuid at ${LocalDateTime.now()}")
+    log.info(s"done processing IO bound task count:$count with id:$uuid at ${LocalDateTime.now()}")
   }
 
   def performCPU(uuid: String, count: Int, fibCompute:Int): Unit = {
 
-    println(s"received cpu task count:$count with id:$uuid at ${LocalDateTime.now()}")
+    log.info(s"received cpu task count:$count with id:$uuid at ${LocalDateTime.now()}")
     def fib(n: BigInteger): BigInteger = if (n.compareTo(BigInteger.ONE) == -1 || n.compareTo(BigInteger.ONE) == 0) n
     else fib(n.subtract(BigInteger.ONE)).add(fib(n.subtract(BigInteger.ONE).subtract(BigInteger.ONE)))
 
     fib(BigInteger.valueOf(fibCompute))
-    println(s"done processing CPU bound task count:$count with id:$uuid at ${LocalDateTime.now()}")
+    log.info(s"done processing CPU bound task count:$count with id:$uuid at ${LocalDateTime.now()}")
   }
 
   override def receive: Receive = {
