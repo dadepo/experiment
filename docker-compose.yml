@@ -12,6 +12,7 @@ services:
     image: registry.me:5000/seedroute:0.1.0-SNAPSHOT
     deploy:
       mode: replicated
+      replicas: 1
       placement:
          constraints: [node.labels.role == master]
     ports:
@@ -33,9 +34,10 @@ services:
       - experiment-network
     image: registry.me:5000/workerroute:0.1.0-SNAPSHOT
     deploy:
-      mode: replicated            
+      mode: replicated
+      replicas: 1      
       placement:
-         constraints: [node.labels.role == worker]
+         constraints: [node.labels.role == worker1]
     ports:
       - '1601:1601'
     env_file:
@@ -53,8 +55,9 @@ services:
     image: registry.me:5000/workerroute:0.1.0-SNAPSHOT
     deploy:
       mode: replicated
+      replicas: 1
       placement:
-         constraints: [node.labels.role == worker]
+         constraints: [node.labels.role == worker2]
     ports:
       - '1602:1602'
     env_file:

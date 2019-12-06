@@ -87,7 +87,7 @@ lazy val workerroute = project.settings(
   common
 )
 
-dockerBaseImage := "java:8-jre-alpine"
+dockerBaseImage := "java:11-jre-alpine"
 version in Docker := "latest"
 dockerExposedPorts := Seq(8000)
 dockerRepository := Some("127.0.0.1:5000")
