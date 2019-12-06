@@ -17,11 +17,11 @@ class WorkerRouterActor extends Actor with Timers {
 
   override def receive: Receive = {
     case iotask @ IOTasks(uuid, i, _) => {
-      log.info(s"routing io task count: $i with id:$uuid to worker at ${LocalDateTime.now()}")
+      log.info(s"${this.self.path} routing io task count: $i with id:$uuid to worker at ${LocalDateTime.now()}")
       router !  iotask
     }
     case cputask @ CPUTasks(uuid, i,_) => {
-      log.info(s"routing cpu task count: $i with id:$uuid to worker at ${LocalDateTime.now()}")
+      log.info(s"${this.self.path} routing cpu task count: $i with id:$uuid to worker at ${LocalDateTime.now()}")
       router !  cputask
     }
   }
