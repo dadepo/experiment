@@ -2,7 +2,7 @@ package nl.os3.ls
 
 import java.time.LocalDateTime
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorLogging, ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.routing.{ConsistentHashingPool, FromConfig, RoundRobinPool}
 import com.typesafe.config.{Config, ConfigFactory}
@@ -10,8 +10,9 @@ import akka.http.scaladsl.server.RouteResult._
 import akka.pattern.ask
 
 import scala.io.StdIn
-import akka.actor.ActorSystem
 import akka.cluster.routing.{ClusterRouterPool, ClusterRouterPoolSettings}
+import akka.event.Logging
+import akka.event.slf4j.Logger
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Route
@@ -28,8 +29,10 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 
 
-object SeedApp extends App {
+object SeedApp extends App  {
   val config: Config = ConfigFactory.load()
+
+
 
   val hostIp = config.getString("akka.remote.netty.tcp.hostname")
   val hostPost = config.getString("akka.remote.netty.tcp.port")
@@ -46,6 +49,9 @@ object SeedApp extends App {
   println("I am connecting to seed on : {}", seed)
 
   implicit val system: ActorSystem = ActorSystem(clusterName, config)
+
+  val logger = Logger(this.getClass.getName)
+
   implicit lazy val timeout = Timeout(5.seconds)
 
   val clusterManager: ActorRef = system.actorOf(ClusterManager(), "clusterManager")
@@ -88,18 +94,20 @@ object SeedApp extends App {
             val interval = experimentData.delay
 
             val iotaskFuture = Future {
+
               for (i <- 1 to ioTasks) {
-                println(s"dispatching io task count: $i with id:$uuid at ${LocalDateTime.now()}")
+                logger.info(s"dispatching io task count: $i with id:$uuid at ${LocalDateTime.now()}")
                 workRouter ! IOTasks(uuid, i, ioThreadSleep)
                 if (interval != -1 || interval != 0) {
                   Thread.sleep(interval * 1000)
                 }
               }
+
             }
 
             val cputaskFuture = Future {
               for (i <- 1 to cpuTasks) {
-                println(s"dispatching cpu task count: $i with id:$uuid at ${LocalDateTime.now()}")
+                logger.info(s"dispatching cpu task count: $i with id:$uuid at ${LocalDateTime.now()}")
                 workRouter ! CPUTasks(uuid, i, fibCompute)
                 if (interval != -1 || interval != 0) {
                   Thread.sleep(interval * 1000)
