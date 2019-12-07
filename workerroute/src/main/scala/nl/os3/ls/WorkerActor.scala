@@ -2,13 +2,13 @@ package nl.os3.ls
 
 import java.math.BigInteger
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 
 import akka.actor.{Actor, Props}
 import akka.event.Logging
 import com.typesafe.config.{Config, ConfigFactory}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object WorkerActor {
   def apply() = Props[WorkerActor]
@@ -20,10 +20,15 @@ class WorkerActor extends Actor {
 
   val log = Logging(context.system, this)
 
-  def performIO(uuid: String, count: Int, ioThreadSleep: Int) = Future {
-    log.info(s"{${this.self.path}} received io task count: $count with id:$uuid at ${LocalDateTime.now()}")
-    Thread.sleep(ioThreadSleep * 1000)
-    log.info(s"{${this.self.path}} done processing IO bound task count: $count with id:$uuid at ${LocalDateTime.now()}")
+  implicit val executionContext: ExecutionContext = context.system.dispatchers.lookup("custom-dispatcher")
+
+  def performIO(uuid: String, count: Int, ioThreadSleep: Long) = {
+
+    Future {
+      log.info(s"{${this.self.path}} received io task count: $count with id:$uuid at ${LocalDateTime.now()}")
+      TimeUnit.MILLISECONDS.sleep(ioThreadSleep)
+      log.info(s"{${this.self.path}} done processing IO bound task count: $count with id:$uuid at ${LocalDateTime.now()}")
+    }
   }
 
   def performCPU(uuid: String, count: Int, fibCompute:Int): Unit = {
